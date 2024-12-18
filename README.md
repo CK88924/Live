@@ -64,11 +64,11 @@
 5. [Streamlink](https://yowlab.idv.tw/wordpress/?p=477) - 支援直播流的工具，兼容多平台。
 
 ## 執行畫面
-<img src="res/bilibili.png" alt="成果圖像" width="800" height="800">
-<img src="res/twitch.png" alt="成果圖像" width="800" height="800">
-<img src="res/yt1.png" alt="成果圖像" width="800" height="800">
-<img src="res/yt2.png" alt="成果圖像" width="800" height="800">
+<img src="res/bilibili.png" alt="成果圖像" width="1080" height="1920">
+<img src="res/twitch.png" alt="成果圖像" width="1080" height="1920">
+<img src="res/yt1.png" alt="成果圖像" width="1080" height="1920">
+<img src="res/yt2.png" alt="成果圖像" width="1080" height="1920">
 
 ## 問題畫面
-<img src="pb/001.JPG" alt="問題圖像" width="800" height="800">
-<img src="pb/002.JPG" alt="問題圖像" width="800" height="800">
+<img src="pb/001.JPG" alt="問題圖像" width="1080" height="1920">
+<img src="pb/002.JPG" alt="問題圖像" width="1080" height="1920">
