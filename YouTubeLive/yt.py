@@ -7,8 +7,9 @@ from multiprocessing import Manager
 from dotenv import load_dotenv
 
 # 檢查直播狀態
-def check_live_status(api_key, channel_id, currently_recording, retries=3, delay=5):
-    """檢查頻道是否正在直播"""
+def check_live_status(api_key, channel_id, currently_recording, live_streams, retries=3, delay=5):
+    """檢查頻道是否正在直播，並保存直播信息到列表
+    """
     attempt = 0
     while attempt < retries:
         attempt += 1
@@ -26,13 +27,11 @@ def check_live_status(api_key, channel_id, currently_recording, retries=3, delay
                     channel_name = item['snippet']['channelTitle']
                     print(f"Detected live stream: {channel_name}, URL: {live_url}")
 
-                    # 如果該頻道未在錄製中，則啟動錄製進程
-                    if not currently_recording.get(channel_name, False):
-                        currently_recording[channel_name] = True
-                        process = multiprocessing.Process(target=run_ytarchive, args=(live_url, channel_name, currently_recording))
-                        process.start()
+                    # 如果該頻道未在錄製中，保存到直播列表
+                    if not currently_recording.get(channel_name, False) and (live_url, channel_name) not in live_streams:
+                        live_streams.append((live_url, channel_name))
                     else:
-                        print(f"{channel_name} is already recording. Skipping...")
+                        print(f"{channel_name} is already recording or live stream already listed. Skipping...")
                 return True
             else:
                 print(f"Channel ID {channel_id} is not live.")
@@ -48,7 +47,8 @@ def check_live_status(api_key, channel_id, currently_recording, retries=3, delay
 
 # 模擬錄製命令
 def run_ytarchive(live_url, channel_name, currently_recording):
-    """執行 ytarchive 命令進行錄製"""
+    """執行 ytarchive 命令進行錄製
+    """
     command = [
         "ytarchive",
         live_url,
@@ -66,37 +66,46 @@ def run_ytarchive(live_url, channel_name, currently_recording):
     except Exception as e:
         print(f"錄製出錯：{channel_name}，錯誤：{e}")
     finally:
-        # 標記該頻道的錄製已完成
+        # 標誌該頻道的錄製已完成
         print(f"錄製完成：{channel_name}")
         currently_recording[channel_name] = False
 
 # 主監控函數
 def run_monitoring(channel_id_list, api_key):
-    """定期檢查頻道是否正在直播"""
+    """定期檢查頻道是否正在直播
+    """
     with Manager() as manager:
         currently_recording = manager.dict()
         
         while True:
+            live_streams = manager.list()  # 用於保存所有檢測到的直播
             processes = []
             
             for channel_id in channel_id_list:
                 print(f"開始檢查頻道：{channel_id}")
                 
                 # 每個頻道的檢查作為一個進程
-                process = multiprocessing.Process(target=check_live_status, args=(api_key, channel_id, currently_recording))
+                process = multiprocessing.Process(target=check_live_status, args=(api_key, channel_id, currently_recording, live_streams))
                 processes.append(process)
                 process.start()
 
             # 等待所有檢查進程完成
             for process in processes:
                 process.join()
-            
+
+            # 檢查完成後統一處理錄製
+            for live_url, channel_name in live_streams:
+                currently_recording[channel_name] = True
+                process = multiprocessing.Process(target=run_ytarchive, args=(live_url, channel_name, currently_recording))
+                process.start()
+
             print("Waiting 30 minutes before the next round of checks...")
             time.sleep(30 * 60)  # 每 30 分鐘執行一次檢查
 
 # 從文件讀取頻道 ID
 def read_channels(filename):
-    """從文件讀取頻道 ID"""
+    """從文件讀取頻道 ID
+    """
     channel_id_list = []
     try:
         with open(filename, 'r') as file:
