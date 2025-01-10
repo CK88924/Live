@@ -108,7 +108,7 @@ def read_channels(filename):
     """
     channel_id_list = []
     try:
-        with open(filename, 'r') as file:
+        with open(filename, 'r',encoding="utf-8") as file:
             for line in file:
                 channel_id = line.strip()
                 if channel_id:

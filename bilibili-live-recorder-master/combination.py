@@ -78,7 +78,7 @@ def write_updated_rooms_to_config():
 
 
 def read_mids_and_get_info_run(filename):
-    with open(filename, 'r') as file:
+    with open(filename, 'r',encoding="utf-8") as file:
         for line in file:
             mid = line.strip()
             if mid.isdigit():  # 檢查 mid 是否為有效數字
