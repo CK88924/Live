@@ -55,6 +55,29 @@
 
 這些配置檔案將告訴程序如何找到相應的直播內容。
 
+## 主程式配置
+
+請在專案根目錄建立 `config.py` 檔案，內容如下：
+
+```python
+# config.py
+# -*- coding: utf-8 -*-
+# —— Server酱推送設定 ——
+send_key = ''          # 你的 SendKey，沒有就留空
+enable_inform = False  # True 時才會真的推送通知
+
+# —— 錄製房間列表（combination.py 會覆寫這一行） ——
+rooms = []  # 例如：['1075', '547028', '8694442']
+
+def add_room(room_id):
+    """把房號加入 rooms（避免重複與空白）"""
+    global rooms
+    if room_id is None:
+        return
+    room_id = str(room_id).strip()
+    if room_id and room_id not in rooms:
+        rooms.append(room_id)
+
 ## 參考 GitHub 庫及資料
 
 1. [twitch-dlp](https://github.com/DmitryScaletta/twitch-dlp) - 用於錄製 Twitch 直播的工具。
