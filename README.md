@@ -77,6 +77,7 @@ def add_room(room_id):
     room_id = str(room_id).strip()
     if room_id and room_id not in rooms:
         rooms.append(room_id)
+ ```
 
 ## 參考 GitHub 庫及資料
 
