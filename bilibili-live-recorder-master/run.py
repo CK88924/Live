@@ -1,3 +1,5 @@
+# run.py
+# -*- coding: utf-8 -*-
 import os
 import re
 import sys
@@ -26,10 +28,16 @@ class BiliBiliLiveRecorder(BiliBiliLive):
         while True:
             try:
                 room_info = self.get_room_info()
-                if room_info['status']:
-                    self.inform(room_id=self.room_id, desp=room_info['roomname'])
-                    self.print(self.room_id, room_info['roomname'])
-                    return self.get_live_urls()
+                if room_info.get('status'):
+                    # 開播：通知 + 印出房名，然後取直播流 URL
+                    self.inform(room_id=self.room_id, desp=room_info.get('roomname', ''))
+                    self.print(self.room_id, room_info.get('roomname', ''))
+                    urls = self.get_live_urls()
+                    if not urls:
+                        self.print(self.room_id, '未取得直播流 URL，稍後重試')
+                        time.sleep(interval)
+                        continue
+                    return urls
                 else:
                     self.print(self.room_id, '等待開播')
             except Exception as e:
@@ -56,7 +64,16 @@ class BiliBiliLiveRecorder(BiliBiliLive):
             except requests.exceptions.Timeout:
                 retries += 1
                 self.print(self.room_id, f"超時，正在嘗試更新流 URL（第 {retries} 次）")
-                record_url = self.get_live_urls()[0]  # 獲取新的直播流 URL
+                try:
+                    new_urls = self.get_live_urls()
+                    if not new_urls:
+                        self.print(self.room_id, "未取得新 URL，稍後再試")
+                        time.sleep(3)
+                        continue
+                    record_url = new_urls[0]
+                except Exception as e:
+                    self.print(self.room_id, f"更新流 URL 失敗: {e}")
+                    time.sleep(3)
             except Exception as e:
                 self.print(self.room_id, f"Error while recording: {e}")
                 break
@@ -89,18 +106,27 @@ class BiliBiliLiveRecorder(BiliBiliLive):
 
 
 if __name__ == '__main__':
-    # 獲取輸入的房間號或從配置文件加載
+    # 保底：確保 config 有 rooms
+    if not hasattr(config, 'rooms'):
+        config.rooms = []
+
+    # 取得輸入房號或從配置文件加載
     if len(sys.argv) == 2:
-        input_ids = [str(sys.argv[1])]
+        input_ids = [str(sys.argv[1]).strip()]
     elif len(sys.argv) == 1:
-        input_ids = config.rooms  # 從配置加載
+        input_ids = list(config.rooms)  # 從配置加載
     else:
-        raise ValueError('請檢查輸入命令是否正確，例如：python3 run.py 10086')
+        raise ValueError('請檢查輸入命令是否正確，例如：python run.py 10086')
+
+    # 若清單為空，給出提示並停止（避免啟無進程）
+    if not input_ids:
+        print('[提示] 沒有指定房間號，且 config.rooms 為空。')
+        print('  → 可用法一：python run.py 10086')
+        print('  → 可用法二：先用 combination.py 產生 rooms 再自動啟動')
+        sys.exit(0)
 
     # 多進程錄制
-    tasks = [
-        multiprocessing.Process(target=BiliBiliLiveRecorder(room_id).run) for room_id in input_ids
-    ]
+    tasks = [multiprocessing.Process(target=BiliBiliLiveRecorder(room_id).run) for room_id in input_ids]
     for task in tasks:
         task.start()
     for task in tasks:
