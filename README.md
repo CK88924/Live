@@ -93,6 +93,6 @@ def add_room(room_id):
 <img src="res/yt1.png" alt="成果圖像" style="max-width: 100%; height: auto;">
 <img src="res/yt2.png" alt="成果圖像" style="max-width: 100%; height: auto;">
 
-## 問題畫面
+## 問題畫面(多為VPN影響請求)
 <img src="pb/001.JPG" alt="問題圖像" style="max-width: 100%; height: auto;">
 <img src="pb/002.JPG" alt="問題圖像" style="max-width: 100%; height: auto;">
