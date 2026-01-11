@@ -43,11 +43,29 @@ def inform(room_id, desp=''):
 
 
 def print_log(room_id='None', content='None'):
-    """統一日誌格式"""
+    """統一日誌格式：同時輸出到 console + logs/YYYY-MM-DD.log"""
     brackets = '[{}]'
     time_part = brackets.format(get_current_time('%Y-%m-%d %H:%M:%S'))
-    room_part = brackets.format('直播间: ' + room_id)
-    print(time_part, room_part, content)
+    room_part = brackets.format('直播间: ' + str(room_id))
+    line = f"{time_part} {room_part} {content}"
+
+    # 1) console
+    print(line, flush=True)
+
+    # 2) file
+    try:
+        log_dir = os.path.join(os.getcwd(), "logs")
+        if not os.path.exists(log_dir):
+            os.mkdir(log_dir)
+
+        day = get_current_time('%Y-%m-%d')
+        log_path = os.path.join(log_dir, f"{day}.log")
+
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except Exception:
+        # 寫檔失敗也不影響錄製
+        pass
 
 
 def checkRecordDirExisted():

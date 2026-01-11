@@ -75,6 +75,6 @@ if __name__ == '__main__':
 
     strcmd = "ffmpeg -y -i {} D:\1075\wis.flv".format(url)
     print(strcmd)
-    child = subprocess.Popen(['ffmpeg', '-y', '-i', url, r'D:\1075\wis1.flv'], shell=True)
+    child = subprocess.Popen(['ffmpeg', '-y', '-i', url, r'D:\1075\wis1.flv'], shell=True, encoding='utf-8', errors='replace')
     child.wait()
 
